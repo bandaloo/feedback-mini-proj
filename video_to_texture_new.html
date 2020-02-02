@@ -43,7 +43,7 @@
       vec2 pos = gl_FragCoord.xy / resolution;
       // rotate and scale
       pos -= vec2(0.5);
-      pos = rotate2d(0.01) * 1.1 * pos;
+      pos = rotate2d(0.03) * 1.1 * pos;
       pos += vec2(0.5);
 
       float rsin = 0.5 + 0.25 * (1. - sin(time / 100.));
@@ -290,7 +290,6 @@
       // schedules render to be called the next time the video card requests
       // a frame of video
       window.requestAnimationFrame(render);
-      //console.log(video);
 
       // use our feedback shader
       gl.useProgram(feedbackProgram);
