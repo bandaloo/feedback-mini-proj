@@ -34,15 +34,30 @@
     // get access to the last frame of video
     uniform sampler2D feedbackTexture;
 
+    // from the
+    mat2 rotate2d(float _angle){
+      return mat2(cos(_angle),-sin(_angle), sin(_angle),cos(_angle));
+    }
+
     void main() {
       vec2 pos = gl_FragCoord.xy / resolution;
-      vec3 video = texture2D( videoTexture, pos ).rgb;
-      pos += sin(time / 100.0) * 0.005;
+      // rotate and scale
+      pos -= vec2(0.5);
+      pos = rotate2d(0.01) * 1.1 * pos;
+      pos += vec2(0.5);
+
+      float rsin = 0.5 + 0.25 * (1. - sin(time / 100.));
+      float gsin = 0.5 + 0.25 * (1. - sin(time / 200.));
+      float bsin = 0.5 + 0.25 * (1. - sin(time / 300.));
+      vec3 sinVec = vec3(rsin, gsin, bsin);
+      vec3 video = sinVec * (1. - texture2D( videoTexture, pos ).rgb);
+      const float s = 0.005;
+      pos += vec2(cos(time / 100.0), sin(time / 100.0)) * s;
       vec3 prior = texture2D( feedbackTexture, pos ).rgb;
 
       // our final output is a combination of the live video signal
       // and our feedback
-      gl_FragColor = vec4( (video * .125 + prior * feedbackAmount), 1. );
+      gl_FragColor = vec4( video * .125 + prior * feedbackAmount, 1. );
     }
   </script>
 
@@ -171,7 +186,7 @@
       gl.uniform2f(uRes, gl.drawingBufferWidth, gl.drawingBufferHeight);
 
       uFeedback = gl.getUniformLocation(feedbackProgram, "feedbackAmount");
-      gl.uniform1f(uFeedback, 0.925);
+      gl.uniform1f(uFeedback, 0.94);
 
       // find a pointer to the uniform "time" in our fragment shader
       uTime = gl.getUniformLocation(feedbackProgram, "time");
@@ -275,6 +290,7 @@
       // schedules render to be called the next time the video card requests
       // a frame of video
       window.requestAnimationFrame(render);
+      //console.log(video);
 
       // use our feedback shader
       gl.useProgram(feedbackProgram);
